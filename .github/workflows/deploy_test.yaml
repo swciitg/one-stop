@@ -1,27 +1,26 @@
 name: Deploy Test
 on:
-    workflow_dispatch:
-    push:
-        paths:
-            - "./"
-        branches:
-            - "dev"
+  workflow_dispatch:
+  push:
+    paths:
+      - "./"
+    branches:
+      - "dev"
 
 jobs:
-
   build:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Establish connection and deploy
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: ${{ secrets.SSH_PORT }}
-        username: ${{ secrets.SSH_USERNAME }}
-        script: |
+      - name: Establish connection and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          script: |
             cd /webapps/test-servers/one-stop-2021
             git checkout dev
             git pull origin dev

@@ -19,3 +19,4 @@ exports.notificationRouter = require("./notification.routes");
 exports.gcScoreboardRouter = require("./gcScoreboardRouter");
 exports.upspRouter = require("./upspRouter");
 exports.homePage = require("./homePageRouter");
+exports.opiRouter = require("./habRoutes/opiRouter");

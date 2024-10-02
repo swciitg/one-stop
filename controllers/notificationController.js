@@ -23,30 +23,39 @@ exports.sendTestNotifToDevice = async (req, res) => {
 
   let user = await userModel.findOne({ outlookEmail: req.body.sendTo });
 
-  const payload = {
-    "notification": {
-      "body": "test body",
-      "OrganizationId": "2",
-      "priority": "high",
-      "subtitle": "test header",
-      "Title": "hello"
-    },
-    data: {
-      category: req.body.category,
-      model: "",
-      header: "test header",
-      body: "test body"
-    }
-  };
-
-  const options = { priority: "high" };
   let userNotifTokens = await userNotifTokenModel.find({ userid: user._id });
   console.log(userNotifTokens);
   for (let i = 0; i < userNotifTokens.length; i++) {
-    await firebase.messaging().sendToDevice(userNotifTokens[i].deviceToken, payload);
+    const payload = {
+      "message": {
+        "token": userNotifTokens[i].deviceToken,
+        "notification": {
+          "body": "test body",
+          "OrganizationId": "2",
+          "priority": "high",
+          "subtitle": "test header",
+          "Title": "hello"
+        },
+      },
+      data: {
+        category: req.body.category,
+        model: "",
+        header: "test header",
+        body: "test body"
+      }
+    };
+    await firebase.messaging().send(payload)
+    .then((response) => {
+      console.log("Successfully sent message:", response);
+    })
+    .catch((error) => {
+      console.log("Error sending message:", error);
+    });
+    // await firebase.messaging().sendToDevice(userNotifTokens[i].deviceToken, payload);
     console.log("NOTIFICATION SENT");
   }
   res.json({"success" : true});
+  
 
 };
 
@@ -88,20 +97,6 @@ exports.updateTopicSubscriptionOfUser = async (notifPref,userid) => {
 
 exports.sendToUser = async (userid,category,title,body) => {
 
-  const payload = {
-    notification: {
-      title: title,
-      body: body
-    },
-    data: {
-      category: category,
-      title: title,
-      body: body
-    }
-  };
-
-  const options = { priority: "high" };
-  
   let userNotifTokens = await userNotifTokenModel.find({ userid: userid });
   console.log(userNotifTokens);
 
@@ -109,9 +104,34 @@ exports.sendToUser = async (userid,category,title,body) => {
   await userPersonalNotif.save();
 
   for (let i = 0; i < userNotifTokens.length; i++) {
-    await firebase.messaging().sendToDevice(userNotifTokens[i].deviceToken, payload,options);
+    const payload = {
+      "message": {
+        "token": userNotifTokens[i].deviceToken,
+        "notification": {
+          "body": body,
+          "title": title
+        },
+      },
+      data: {
+        category: category,
+        title: title,
+        body: body
+      }
+    };
+    await firebase.messaging().send(payload)
+    .then((response) => {
+      console.log("Successfully sent message:", response);
+    })
+    .catch((error) => {
+      console.log("Error sending message:", error);
+    });
+    // await firebase.messaging().sendToDevice(userNotifTokens[i].deviceToken, payload,options);
     console.log("NOTIFICATION SENT");
   }
+
+
+  // const options = { priority: "high" };
+  
 };
 
 exports.sendToATopic = async (topic,notification,data) => {

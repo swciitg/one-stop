@@ -1,7 +1,3 @@
-const jwt = require("jsonwebtoken");
-const accessjwtsecret = process.env.ACCESS_JWT_SECRET;
-const refreshjwtsecret = process.env.REFRESH_JWT_SECRET;
-const onestopUserModel = require("../models/userModel");
 const msal = require('@azure/msal-node');
 const request = require('request');
 const { createOrFindOnestopUserID, getUserTokens } = require('./onestopUserController');
@@ -50,7 +46,9 @@ exports.microsoftLoginRedirect = (req, res) => {
   };
 
   pca.acquireTokenByCode(tokenRequest).then(async (response) => {
-    // console.log("\nResponse: \n:", response);
+    console.log("Access Token");
+    console.log(response.accessToken);
+
     request.get({
       url: "https://graph.microsoft.com/v1.0/me",
       headers: {
@@ -74,7 +72,7 @@ exports.microsoftLoginRedirect = (req, res) => {
       let userid = await createOrFindOnestopUserID(userInfo.displayName, userInfo.mail, userInfo.surname);
       const userTokensString = await getUserTokens(userid);
       console.log(userTokensString);
-      // res.set('Authorization', `Bearer ${JSON.parse(userTokensString).accessToken}`);
+      
       return res.render('authSuccessView.ejs', { userTokens: userTokensString });
     });
   });

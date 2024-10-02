@@ -11,6 +11,8 @@ const { errorHandler } = require("./middlewares/error.handler");
 const { NotFoundError } = require("./errors/not.found.error");
 const { createLastUpdateDocument } = require("./controllers/lastUpdateController");
 const { UnauthorizedRequestError } = require("./errors/unauthorized.request.error");
+const { scheduleOPIEmails } = require("./helpers/cronJobs/opiEmails");
+const { scheduleMessChange } = require("./helpers/cronJobs/messChange");
 
 console.log(bcrypt.hash("123",10));
 //for serving static files
@@ -52,7 +54,7 @@ app.use((req, res, next) => {
 app.use(BASEURL, routers.authRouter.authRouter);
 app.use(BASEURL, routers.imageRouter.imageRouter);
 
-// Validate API Call
+//Validate API Call
 app.use((req, res, next) => {
     console.log(req.path);
     console.log(req.body);
@@ -80,12 +82,22 @@ app.use(BASEURL, routers.newsRouter.newsRouter);
 app.use(BASEURL, routers.campusTravelRouter.campusTravelRouter);
 app.use(BASEURL, routers.upspRouter);
 app.use(BASEURL, routers.gcScoreboardRouter.gcScoreboardRouter);
+app.use(BASEURL, routers.opiRouter.opiRouter);
 
 app.use("*",(req,res) => {
     throw new NotFoundError("Route not found");
 });
 
 app.use(errorHandler);
+
+// schedule cron jobs
+try {
+    scheduleOPIEmails();
+    scheduleMessChange();
+}
+catch (e) {
+    console.log("Error in scheduling OPI emails", e);
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {

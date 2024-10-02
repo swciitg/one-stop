@@ -1,29 +1,27 @@
 name: Deploy Main
 on:
-    workflow_dispatch:
-    push:
-        paths:
-            - "./"
-        branches:
-            - "main"
+  workflow_dispatch:
+  push:
+    paths:
+      - "./"
+    branches:
+      - "main"
 
 jobs:
-
   build:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-    - name: Establish connection and deploy
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        key: ${{ secrets.SSH_KEY }}
-        passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        port: ${{ secrets.SSH_PORT }}
-        username: ${{ secrets.SSH_USERNAME }}
-        script: |
+      - name: Establish connection and deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          script: |
             cd /webapps/one-stop-2021
             git pull
             git status
             docker-compose -f docker-compose.prod.yaml up -d --build
-
